@@ -1,0 +1,12 @@
+<div class="h-screen flex flex-column justify-content-center align-items-center bg-black-alpha-90">
+  <img class="w-4rem mb-8" src="assets/images/apple-logo.png" alt="apple-logo" />
+  <p-progressBar
+    [value]="progressBarValue()"
+    [showValue]="false"
+    [style]="{ height: '6px', width: '150px' }"
+    [pt]="{
+      root: { style: { backgroundColor: '#374151', borderRadius: '9999px' } },
+      value: { style: { backgroundColor: '#e5e7eb', borderRadius: '9999px' } },
+    }"
+  ></p-progressBar>
+</div>
