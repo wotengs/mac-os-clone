@@ -1,5 +1,10 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { interval } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
+
 import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
@@ -9,17 +14,24 @@ import { ProgressBarModule } from 'primeng/progressbar';
 })
 export class Boot implements OnInit {
   private readonly _router = inject(Router);
+  private readonly _destroyRef = inject(DestroyRef);
 
-  progressBarValue = signal<number>(0);
+  readonly progressBarValue = signal(0);
 
-  ngOnInit() {
-    let interval = setInterval(() => {
-      this.progressBarValue.set(this.progressBarValue() + Math.floor(Math.random() * 10) + 40);
-      if (this.progressBarValue() >= 100) {
-        this.progressBarValue.set(100);
-        clearInterval(interval);
-        this._router.navigate(['/login']);
-      }
-    }, 1500);
+  ngOnInit(): void {
+    interval(1500)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        takeWhile(() => this.progressBarValue() < 100, true),
+      )
+      .subscribe(() => {
+        const next = Math.min(this.progressBarValue() + 40 + Math.floor(Math.random() * 10), 100);
+
+        this.progressBarValue.set(next);
+
+        if (next === 100) {
+          this._router.navigate(['/login']);
+        }
+      });
   }
 }
